@@ -1,112 +1,91 @@
 #include <iostream>
 #include <vector>
-#include <string>
 #include <queue>
+#include <unordered_map>
 
 using namespace std;
 
 struct TrieNode {
-    vector<int> next; // Переходы для каждого символа (a..z)
-    int fail; // Ссылка на суффиксный префикс
-    vector<int> out; // Список индексов подстрок, которые заканчиваются в этом узле
-
-    TrieNode(int alphabet_size) : next(alphabet_size, -1), fail(-1) {}
+    unordered_map<char, TrieNode*> children;
+    TrieNode* fail = nullptr;
+    vector<int> output;
 };
 
 class AhoCorasick {
 public:
-    AhoCorasick() : trie(1, TrieNode(26)) {}
-
-    // Строим дерево состояний для множества строк
-    void build(const vector<string>& patterns) {
-        // Добавляем все строки в дерево
-        for (int i = 0; i < patterns.size(); ++i) {
-            addPattern(patterns[i], i);
+    AhoCorasick() { root = new TrieNode(); }
+    
+    void insert(const string& word, int index) {
+        TrieNode* node = root;
+        for (char ch : word) {
+            if (!node->children.count(ch)) {
+                node->children[ch] = new TrieNode();
+            }
+            node = node->children[ch];
+        }
+        node->output.push_back(index);
+    }
+    
+    void build() {
+        queue<TrieNode*> q;
+        root->fail = root;
+        
+        for (auto& entry : root->children) {
+            char ch = entry.first;
+            TrieNode* child = entry.second;
+            child->fail = root;
+            q.push(child);
         }
         
-        // Строим суффиксные ссылки с помощью BFS
-        buildFailureLinks();
-    }
-
-    // Поиск всех вхождений подстрок в тексте
-    vector<vector<int>> search(const string& text) {
-        vector<vector<int>> result(text.size());
-        int state = 0; // Начальное состояние
-
-        for (int i = 0; i < text.size(); ++i) {
-            int ch = text[i] - 'a';
+        while (!q.empty()) {
+            TrieNode* curr = q.front();
+            q.pop();
             
-            // Ищем следующий переход в дереве
-            while (state != 0 && trie[state].next[ch] == -1) {
-                state = trie[state].fail;
-            }
-
-            if (trie[state].next[ch] != -1) {
-                state = trie[state].next[ch];
-            }
-
-            // Добавляем все совпадения из текущего состояния
-            for (int patternIndex : trie[state].out) {
-                result[i].push_back(patternIndex);
+            for (auto& entry : curr->children) {
+                char ch = entry.first;
+                TrieNode* child = entry.second;
+                TrieNode* fail = curr->fail;
+                
+                while (fail != root && !fail->children.count(ch)) {
+                    fail = fail->fail;
+                }
+                
+                if (fail->children.count(ch) && fail->children[ch] != child) {
+                    child->fail = fail->children[ch];
+                } else {
+                    child->fail = root;
+                }
+                
+                child->output.insert(child->output.end(), child->fail->output.begin(), child->fail->output.end());
+                q.push(child);
             }
         }
-
-        return result;
+    }
+    
+    vector<vector<int>> search(const string& text, int m) {
+        vector<vector<int>> occurrences(m);
+        TrieNode* node = root;
+        
+        for (int i = 0; i < text.size(); ++i) {
+            char ch = text[i];
+            while (node != root && !node->children.count(ch)) {
+                node = node->fail;
+            }
+            if (node->children.count(ch)) {
+                node = node->children[ch];
+            } else {
+                node = root;
+            }
+            for (int patternIndex : node->output) {
+                occurrences[patternIndex].push_back(i + 1);
+            }
+        }
+        
+        return occurrences;
     }
 
 private:
-    vector<TrieNode> trie;
-
-    void addPattern(const string& pattern, int index) {
-        int state = 0;
-        for (char c : pattern) {
-            int ch = c - 'a';
-            if (trie[state].next[ch] == -1) {
-                trie[state].next[ch] = trie.size();
-                trie.push_back(TrieNode(26));
-            }
-            state = trie[state].next[ch];
-        }
-        trie[state].out.push_back(index);
-    }
-
-    void buildFailureLinks() {
-        queue<int> q;
-
-        // Начальные состояния для первого уровня
-        for (int ch = 0; ch < 26; ++ch) {
-            if (trie[0].next[ch] != -1) {
-                trie[trie[0].next[ch]].fail = 0;
-                q.push(trie[0].next[ch]);
-            }
-        }
-
-        // BFS для построения всех суффиксных ссылок
-        while (!q.empty()) {
-            int state = q.front();
-            q.pop();
-
-            for (int ch = 0; ch < 26; ++ch) {
-                if (trie[state].next[ch] != -1) {
-                    int failState = trie[state].fail;
-                    while (failState != 0 && trie[failState].next[ch] == -1) {
-                        failState = trie[failState].fail;
-                    }
-
-                    if (trie[failState].next[ch] != -1) {
-                        failState = trie[failState].next[ch];
-                    }
-
-                    trie[trie[state].next[ch]].fail = failState;
-                    for (int patternIndex : trie[failState].out) {
-                        trie[trie[state].next[ch]].out.push_back(patternIndex);
-                    }
-
-                    q.push(trie[state].next[ch]);
-                }
-            }
-        }
-    }
+    TrieNode* root;
 };
 
 int main() {
@@ -114,23 +93,23 @@ int main() {
     int m;
     cin >> s;
     cin >> m;
-    vector<string> regs(m);
-    for (int i = 0; i < m; ++i) {
-        cin >> regs[i];
-    }
-
+    vector<string> patterns(m);
+    
     AhoCorasick ac;
-    ac.build(regs);
-
-    vector<vector<int>> result = ac.search(s);
-
-    // Выводим все найденные индексы для каждого символа в строке
-    for (int i = 0; i < s.size(); ++i) {
-        for (int idx : result[i]) {
-            cout << i - regs[idx].size() + 2 << " "; // Выводим позиции 1-based
-        }
+    for (int i = 0; i < m; ++i) {
+        cin >> patterns[i];
+        ac.insert(patterns[i], i);
     }
-    cout << endl;
-
+    
+    ac.build();
+    vector<vector<int>> result = ac.search(s, m);
+    
+    for (int i = 0; i < m; ++i) {
+        for (int pos : result[i]) {
+            cout << pos << " ";
+        }
+        cout << "\n";
+    }
+    
     return 0;
 }
