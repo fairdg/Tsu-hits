@@ -4,7 +4,6 @@
 
 using namespace std;
 
-// Функция вычисления префикс-функции
 vector<size_t> prefix_function(const string& s) {
     size_t n = s.length();
     vector<size_t> pi(n);
@@ -20,24 +19,24 @@ vector<size_t> prefix_function(const string& s) {
     return pi;
 }
 
-// Функция поиска подстроки с использованием алгоритма КМП
-vector<size_t> kmp_search(const string& text, const string& pattern) {
-    vector<size_t> pi = prefix_function(pattern);
-    vector<size_t> occurrences;
-    size_t j = 0; // Индекс для pattern
+
+vector<size_t> search(const string& text, const string& reg) {
+    vector<size_t> pi = prefix_function(reg);
+    vector<size_t> hgg;
+    size_t j = 0;
     for (size_t i = 0; i < text.length(); ++i) {
-        while ((j > 0) && (text[i] != pattern[j])) {
+        while ((j > 0) && (text[i] != reg[j])) {
             j = pi[j - 1];
         }
-        if (text[i] == pattern[j]) {
+        if (text[i] == reg[j]) {
             ++j;
         }
-        if (j == pattern.length()) {
-            occurrences.push_back(i - j + 1);
+        if (j == reg.length()) {
+            hgg.push_back(i - j + 1);
             j = pi[j - 1];
         }
     }
-    return occurrences;
+    return hgg;
 }
 
 int main() {
@@ -45,15 +44,15 @@ int main() {
     int m;
     cin >> s;
     cin >> m;
-    vector<string> patterns(m);
+    vector<string> regs(m);
     for (int i = 0; i < m; ++i) {
-        cin >> patterns[i];
+        cin >> regs[i];
     }
 
-    for (const string& pattern : patterns) {
-        vector<size_t> indices = kmp_search(s, pattern);
-        for (size_t index : indices) {
-            cout << index << " ";
+    for (const string& reg : regs) {
+        vector<size_t> indexs = search(s, reg);
+        for (size_t index : indexs) {
+            cout << index + 1 << " "; 
         }
         cout << endl;
     }

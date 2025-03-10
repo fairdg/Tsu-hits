@@ -4,17 +4,17 @@
 using namespace std;
 
 int main() {
-    string str1;
-    regex time(R"(((0?[0-9]|1[0-2]):([0-5][0-9]))|(([0-1]?[0-9]|2[0-3]):([0-5][0-9])))");
-
-    while (getline(cin, str1)) {
+    string str;
+    regex expression(R"(([1-9][0-9]*((\+|\*|\/|\-)[1-9][0-9]*)+)|[1-9][0-9]*)");
+    while (getline(cin, str)) {
         smatch match;
-        string temp = str1;
+        string temp = str;
 
-        while (regex_search(temp, match, time)) {
+        while (regex_search(temp, match, expression)) {
             cout << match.str() << endl;
             temp = match.suffix().str();
         }
     }
     return 0;
 }
+ 
