@@ -1,22 +1,26 @@
 #include <iostream>
 #include <string>
 #include <regex>
+
 using namespace std;
 
 int main() {
-    string str1;
-    string time1 = R"(\b((0[1-9]|[12][0-9]|31)\.(0[1-9]|1[0-2])\.(\d{2}|\d{4})|(0[1-9]|[12][0-9])\.02\.(\d{2}|\d{4}))\b)";
-    string time2 = R"(\b((0[1-9]|1[0-2])\.(0[1-9]|[12][0-9]|31)\.(\d{2}|\d{4})|02\.(0[1-9]|[12][0-9])\.(\d{2}|\d{4}))\b)";
+    string str;
+    
+    string DDMMfeb = R"(([0-2][0-9])\.(02))";
+    string MMDDfeb = R"((02)\.([0-2][0-9]))";
+    string DDMM = R"(([012][0-9]|3[01])\.([0][3-9]|1[012]|0[1]))";
+    string MMDD = R"(([0][3-9]|1[012]|0[1])\.([012][0-9]|3[01]))";
+    string year = R"(\.([0-9]{2}([0-9]{2})?))";
+    string sum = DDMMfeb + year + "|" + MMDDfeb + year + "|" + DDMM + year + "|" + MMDD + year;
 
-    string time3 = time1 + "|" + time2;
-
-    regex time(time3);
-
-    while (getline(cin, str1)) {
+    
+    regex data(sum);
+    while (getline(cin, str)) {
         smatch match;
-        string temp = str1;
+        string temp = str;
 
-        while (regex_search(temp, match, time)) {
+        while (regex_search(temp, match, data)) {
             cout << match.str() << endl;
             temp = match.suffix().str();
         }

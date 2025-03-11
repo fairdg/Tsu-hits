@@ -8,14 +8,33 @@ int main() {
     
     string reg1 = R"([a-zA-Z_]\w*\s*=\s*-?\d+\s*;)";
     string reg2 = R"([a-zA-Z_]\w*\s*=\s*[a-zA-Z_]\w*\s*;)";
-    string reg3 = R"([a-zA-Z_]\w*\s*=\s*\[[a-zA-Z_]\w*|\d+\]\s*([+\-*/^]\s*([a-zA-Z_]\w*|\d+|\[[a-zA-Z_]\w*|\d+\]))+;)";
-
-
-
+    string reg3 = R"( 
+    ([a-zA-Z_]\w*) | ( [a-zA-Z_]\w*  \[  [a-zA-Z_]\w*||\d+   \] ) 
+    \s*=\s*   
+         ( [a-zA-Z_]\w*   \[   [a-zA-Z_]\w*|\d+   \]  )
+          |
+          \w+
+          |
+          (   [a-zA-Z_]\w*  )
+     \s*   
+     (
+     [+\-*/^]
+     \s*
+     ( [a-zA-Z_]\w*   \[   [a-zA-Z_]\w*|\d+   \]  )
+          |
+          \w+
+          |
+          ([a-zA-Z_]\w*)
+     )+    
+     ;
+     )";
 
     
+
+
+   
     string save = reg1 + "|" + reg2 + "|" + reg3 ;
-    regex reg(save);
+    regex reg(save,regex::extended);
 
     while (getline(cin, str)) {
         smatch match;

@@ -22,7 +22,7 @@ vector<size_t> prefix_function(const string& s) {
 
 vector<size_t> search(const string& text, const string& reg) {
     vector<size_t> pi = prefix_function(reg);
-    vector<size_t> hgg;
+    vector<size_t> vec;
     size_t j = 0;
     for (size_t i = 0; i < text.length(); ++i) {
         while ((j > 0) && (text[i] != reg[j])) {
@@ -32,11 +32,11 @@ vector<size_t> search(const string& text, const string& reg) {
             ++j;
         }
         if (j == reg.length()) {
-            hgg.push_back(i - j + 1);
+            vec.push_back(i - j + 1);
             j = pi[j - 1];
         }
     }
-    return hgg;
+    return vec;
 }
 
 int main() {
