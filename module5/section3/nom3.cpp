@@ -15,9 +15,9 @@ string normalize(const string& str) {
         }
     }
     
-    stringstream ss(result);
+    stringstream removetext(result);
     string word, normalized;
-    while (ss >> word) {
+    while (removetext >> word) {
         if (word.length() > 3) {
             if (!normalized.empty()) {
                 normalized += " ";
@@ -29,38 +29,39 @@ string normalize(const string& str) {
     return normalized;
 }
 
-double jaccard_coefficient(const string& str1, const string& str2) {
-    set<char> set1(str1.begin(), str1.end());
-    set<char> set2(str2.begin(), str2.end());
-    
-    int intersection_size = 0;
-    for (char c : set1) {
-        if (set2.count(c)) {
-            intersection_size++;
+int countMatches(const string& s1, const string& s2) {
+    int matches = 0;
+    int length = min(s1.length(), s2.length());
+    for (int i = 0; i < length; ++i) {
+        if (s1[i] == s2[i]) {
+            ++matches;
         }
     }
-    
-    int union_size = set1.size() + set2.size() - intersection_size;
-    
-    if (union_size == 0) {
-        return 0.0;
-    } else {
-        return static_cast<double>(intersection_size) / union_size;
-    }
+    return matches;
+}
+
+double jaccard_index(string a, string b) {
+    double n = min(a.size(), b.size());
+    double m = max(a.size(), b.size());
+    double c = 0;
+    for (int i = 0; i < n; ++i) if (a[i] == b[i]) c++;
+    double result = c / ( n + m - c);
+    return result;
+
 }
 
 int main() {
-    string s1, s2;
-    cout << "Enter first string: ";
-    getline(cin, s1);
-    cout << "Enter second string: ";
-    getline(cin, s2);
+    string line1, line2;
+    getline(cin, line1);
+    getline(cin, line2);
     
-    s1 = normalize(s1);
-    s2 = normalize(s2);
-    
-    double similarity = jaccard_coefficient(s1, s2);
-    cout << "Jaccard Coefficient: " << fixed << setprecision(3) << similarity << endl;
+    string normalized1 = normalize(line1);
+    string normalized2 = normalize(line2);
+    string finalText1 = normalized1;
+    string finalText2 = normalized2;
+
+    double score = jaccard_index(finalText1, finalText2);
+    cout << score << endl;
     
     return 0;
 }
