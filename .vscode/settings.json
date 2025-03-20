@@ -110,7 +110,13 @@
     "streambuf": "cpp",
     "text_encoding": "cpp",
     "typeinfo": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "cstdarg": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp",
+    "iomanip": "cpp",
+    "chrono": "cpp",
+    "ratio": "cpp"
   },
   "editor.cursorStyle": "line",
   "window.density.editorTabHeight": "default",
