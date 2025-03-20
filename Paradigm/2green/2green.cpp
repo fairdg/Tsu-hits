@@ -13,7 +13,9 @@ using namespace chrono;
 void solarization(unsigned char* data, int width, int height, int channels, unsigned char threshold = 128) {
     #pragma omp parallel for
     for (int i = 0; i < width * height * channels; i++) {
-        data[i] = (data[i] > threshold) ? (255 - data[i]) : data[i];
+        if (data[i] > threshold) {
+            data[i] = 255 - data[i];
+        }
     }
 }
 
@@ -30,9 +32,17 @@ void sepia(unsigned char* data, int width, int height, int channels) {
     for (int i = 0; i < width * height * channels; i += channels) {
         int r = data[i], g = data[i + 1], b = data[i + 2];
 
-        data[i]     = min(255, static_cast<int>(0.393 * r + 0.769 * g + 0.189 * b));
-        data[i + 1] = min(255, static_cast<int>(0.349 * r + 0.686 * g + 0.168 * b));
-        data[i + 2] = min(255, static_cast<int>(0.272 * r + 0.534 * g + 0.131 * b));
+        int new_r = static_cast<int>(0.393 * r + 0.769 * g + 0.189 * b);
+        int new_g = static_cast<int>(0.349 * r + 0.686 * g + 0.168 * b);
+        int new_b = static_cast<int>(0.272 * r + 0.534 * g + 0.131 * b);
+
+        if (new_r > 255) new_r = 255;
+        if (new_g > 255) new_g = 255;
+        if (new_b > 255) new_b = 255;
+
+        data[i]     = new_r;
+        data[i + 1] = new_g;
+        data[i + 2] = new_b;
     }
 }
 
