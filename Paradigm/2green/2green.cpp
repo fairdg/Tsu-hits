@@ -91,9 +91,9 @@ void sepiaImageSIMD(unsigned char* data, int width, int height, int channels) {
             unsigned char g = row[x * channels + 1];
             unsigned char b = row[x * channels + 2];
 
-            unsigned char newR = std::min(255, int(0.393f * r + 0.769f * g + 0.189f * b));
-            unsigned char newG = std::min(255, int(0.349f * r + 0.686f * g + 0.168f * b));
-            unsigned char newB = std::min(255, int(0.272f * r + 0.534f * g + 0.131f * b));
+            unsigned char newR = min(255, int(0.393f * r + 0.769f * g + 0.189f * b));
+            unsigned char newG = min(255, int(0.349f * r + 0.686f * g + 0.168f * b));
+            unsigned char newB = min(255, int(0.272f * r + 0.534f * g + 0.131f * b));
 
             row[x * channels + 0] = newR;
             row[x * channels + 1] = newG;
