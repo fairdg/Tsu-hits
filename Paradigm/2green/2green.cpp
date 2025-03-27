@@ -220,6 +220,10 @@ void sepia(unsigned char* data, int width, int height, int channels) {
         int new_g = static_cast<int>(0.349 * r + 0.686 * g + 0.168 * b);
         int new_b = static_cast<int>(0.272 * r + 0.534 * g + 0.131 * b);
 
+        if (new_r > 255) new_r = 255;
+        if (new_g > 255) new_g = 255;
+        if (new_b > 255) new_b = 255;
+
         data[i]     = new_r;
         data[i + 1] = new_g;
         data[i + 2] = new_b;
