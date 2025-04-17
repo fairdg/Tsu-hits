@@ -3,75 +3,70 @@
 #include <iomanip>
 using namespace std;
 
-int depthLimit, targetSum;
-long long totalPaths = 0;
-long long successfulPaths = 0;
-
-struct State {
+struct State
+{
     int nodeId;
     double probability;
     int value;
 };
 
-vector<vector<State>> treeLevels;
-
-void explorePaths(int currentNode, int depth, int currentSum, double currentProb) {
-    if (depth == depthLimit) {
-        if (currentSum >= targetSum) {
-            successfulPaths += currentProb;  // Учитываем успешный путь
+void explorePaths(const vector<vector<State>>& tree, int currentNode, int targetSum, double& allProbability, int currentSum, double currentProbability, int depth, int &n)
+{
+    if (depth == n)
+    {
+        if (currentSum >= targetSum)
+        {
+            allProbability += currentProbability;
         }
-        totalPaths++;  // Увеличиваем количество всех путей
         return;
     }
-
-    for (const State& nextState : treeLevels[currentNode]) {
-        explorePaths(nextState.nodeId, depth + 1, currentSum + nextState.value, currentProb * nextState.probability);
+    for (const State& nextState : tree[currentNode])
+    {
+        explorePaths(tree, nextState.nodeId, targetSum, allProbability, currentSum + nextState.value, currentProbability * nextState.probability, depth + 1, n);
     }
 }
 
-int main() {
-    cin >> depthLimit >> targetSum;
+int main()
+{
+    int n, s;
+    cin >> n >> s;
+    double result = 0.0;
+    State node;
+    int number = 1;
+    vector<vector<State>> diceList;
+    diceList.push_back(vector<State>());
+    vector<int> parent = { 0 };
+    for (int i = 0; i < n; i++)
+    {
+        vector<int> nextNode;
+        for (auto nod : parent) {
+            for (int j = 0; j < 6; j++)
+            {
+                node.nodeId = number++;
+                node.probability = 1.0 / 6.0;
+                node.value = j + 1;
 
-    int nextNodeId = 1;
-    vector<int> currentLevel = {0};
-    treeLevels.push_back({});
-
-    for (int level = 0; level < depthLimit; ++level) {
-        vector<int> nextLevel;
-
-        for (int parent : currentLevel) {
-            for (int face = 1; face <= 6; ++face) {
-                State newState;
-                newState.nodeId = nextNodeId++;
-                newState.value = face;
-                newState.probability = 1.0 / 6.0;
-
-                int maxSize = max(parent, newState.nodeId);
-                if (treeLevels.size() <= maxSize) treeLevels.resize(maxSize + 1);
-
-                treeLevels[parent].push_back(newState);
-                nextLevel.push_back(newState.nodeId);
+                int maxIndex = max(nod, node.nodeId);
+                if (diceList.size() <= maxIndex) diceList.resize(maxIndex + 1);
+                diceList[nod].push_back(node);
+                nextNode.push_back(node.nodeId);
             }
         }
-
-        currentLevel = nextLevel;
+        parent = nextNode;
     }
 
-    explorePaths(0, 0, 0, 1.0);
+    explorePaths(diceList, 0, s, result, 0, 1.0, 0, n);
 
-    double probability = (double)successfulPaths / totalPaths;
-    cout << fixed << setprecision(6) << probability << endl;
-
-    for (const auto& level : treeLevels) {
-        if (level.empty()) {
+    cout << fixed << setprecision(6) << result << endl;
+    for (auto node : diceList)
+    {
+        if (!node.empty()) {
+            for (auto nextState : node)
+            {
+                cout << nextState.value << " ";
+            }
             cout << endl;
-            continue;
         }
-        for (const auto& node : level) {
-            cout << node.value << " ";
-        }
-        cout << endl;
     }
-
     return 0;
 }
